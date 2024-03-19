@@ -15,13 +15,34 @@ using namespace std;
 #define pii pair<int,int>
 const int MOD=1e9+7,INF=4e18;
 #define maxn 
-
-void solve(string s1,string s2)
+struct Node{
+    int heSo, mu;
+    Node* next;
+    Node (int HeSo,int Mu)
+    {
+        heSo = HeSo;
+        mu = Mu;
+        next = NULL;
+    }
+};
+void addNode(Node* &cur,int hs,int mu)
 {
-    map<int,int> cnt;
-    stringstream ss1(s1);
+    if (cur == NULL)
+    {
+        cur = new Node(hs, mu);
+        return;
+    }
+    Node* tmp = cur;
+    while (tmp->next != NULL)
+        tmp = tmp->next;
+    tmp->next = new Node(hs, mu);
+}
+int maxMu = -INF;
+void makeNode(string s, Node* &head)
+{
+    stringstream ss(s);
     string token;
-    while (ss1 >> token)
+    while (ss >> token)
     {
         if (token == "+") continue;
         string tmp;
@@ -38,34 +59,19 @@ void solve(string s1,string s2)
             tmp1.push_back(token.back());
             token.pop_back();
         }
-        cnt[stoll(tmp)] += stoll(tmp1);
+        maxMu = max(maxMu, stoll(tmp));
+        addNode(head, stoll(tmp1), stoll(tmp));
     }
-    stringstream ss2(s2);
-    while (ss2 >> token)
+}
+int getHS(Node* cur, int soMu)
+{
+    while (cur != NULL)
     {
-        if (token == "+") continue;
-        string tmp;
-        while (token.back() != '^') 
-        {
-            tmp.push_back(token.back());
-            token.pop_back();
-        }
-        reverse(ALL(tmp));
-        string tmp1;
-        reverse(ALL(token));
-        while (token.back() != '*') 
-        {
-            tmp1.push_back(token.back());
-            token.pop_back();
-        }
-        cnt[stoll(tmp)] += stoll(tmp1);
+        if (cur->mu == soMu)
+            return cur->heSo;
+        cur = cur->next;
     }
-    deb(cnt)
-    vector<pii> ans(ALL(cnt));
-    reverse(ALL(ans));
-    for (int i=0;i<ans.size()-1;i++)
-        cout<<ans[i].second<<"*x^"<<ans[i].first<<" + ";
-    cout<<ans.back().second<<"*x^"<<ans.back().first<<"\n";
+    return 0;
 }
 signed main()
 {
@@ -78,9 +84,23 @@ signed main()
     cin.ignore();
     while (tc--)
     {
-        string s1,s2;	
-        getline(cin, s1);
-        getline(cin, s2);
-        solve(s1, s2);
+        Node *h1 = NULL, *h2 = NULL;
+        string s;
+        getline(cin, s);
+        makeNode(s, h1);
+        getline(cin, s);
+        makeNode(s, h2);
+        Node *head = NULL;
+        FOD(i,maxMu,0)
+            addNode(head, getHS(h1,i) + getHS(h2,i), i);
+        while (head != NULL)
+        {
+            if (head -> heSo)
+                cout<<head->heSo<<"*x^"<<head->mu;
+            head = head->next;
+            if (head != NULL && head->heSo)
+                cout<<" + ";
+        }
+        cout<<"\n";
     }
 }

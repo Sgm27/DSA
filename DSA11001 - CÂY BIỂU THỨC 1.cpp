@@ -15,7 +15,23 @@ using namespace std;
 #define pii pair<int,int>
 const int MOD=1e9+7,INF=4e18;
 #define maxn 
-
+struct Node{
+    char val;
+    Node *left,*right;
+    Node(char c)
+    {
+        val = c;
+        left = right = NULL;
+    }
+};
+vi ans;
+void inorder(Node *cur)
+{
+    if (cur == NULL) return;
+    inorder(cur->left);
+    ans.push_back(cur->val);
+    inorder(cur->right);
+}
 signed main()
 {
     #ifndef ONLINE_JUDGE
@@ -26,18 +42,27 @@ signed main()
     int tc; cin>>tc;
     while (tc--)
     {
+        Node *root;
+        stack<Node*> st;
         string s; cin>>s;
-        stack<string> st;
         for (char c : s)
-        {
-            if (isalpha(c)) st.push(string(1, c));
+            if (!isalpha(c))
+            {
+                root = new Node(c);
+                Node *fi = st.top(); st.pop();
+                Node *se = st.top(); st.pop();
+                root->left = se;
+                root->right = fi;
+                st.push(root);
+            }
             else
             {
-                string r = st.top(); st.pop();
-                string l = st.top(); st.pop();
-                st.push(l+c+r);
+                root = new Node(c);
+                st.push(root);
             }
-        }
-        cout<<st.top()<<"\n";
+        ans.clear();
+        inorder(root);
+        for (char x : ans) cout<<x;
+        cout<<"\n";
     }
 }
